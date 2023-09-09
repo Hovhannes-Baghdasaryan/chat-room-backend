@@ -1,6 +1,7 @@
 export interface I_Message {
   id: string
+  date: Date
   message: string
   username: string
-  date: Date
+  userAvatar: string
 }

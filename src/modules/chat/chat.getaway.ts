@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { Logger } from '@nestjs/common/services'
-import { I_Message } from 'src/common/interfaces/message'
+import { I_Message } from 'src/common/interfaces/message.interface'
 import {
   ConnectedSocket,
   MessageBody,
@@ -31,13 +31,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   @SubscribeMessage('message')
   handleConnection(@ConnectedSocket() socket: Socket, @MessageBody() data: I_Message) {
-    this.logger.log(`Client Connected to ${socket.id} ${data?.message} ${data?.username}`)
+    this.logger.log(`Client Send from ${socket.id} with message ${data?.message} ${data?.username}`)
 
     if (data?.message) {
       const newMessage = this.chatService.addMessage({
-        ...data,
-        date: new Date(),
         id: randomUUID(),
+        date: new Date(),
+        message: data.message,
+        username: data.username,
+        userAvatar: data.userAvatar,
       })
 
       this.server.emit('receive_message', newMessage)
@@ -49,5 +51,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.logger.log(`Client Leaves Socket ${socket.id} ${username}`)
 
     this.server.emit('leave_room', username)
+  }
+
+  @SubscribeMessage('typing')
+  handleTyping(@ConnectedSocket() socket: Socket, @MessageBody() username: string) {
+    this.logger.log(`Client  ${username} Is Typing on Socket ${socket.id}`)
+
+    this.server.emit('receive_typing', username)
   }
 }

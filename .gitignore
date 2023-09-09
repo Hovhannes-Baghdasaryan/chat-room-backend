@@ -4,6 +4,9 @@
 # env file
 /.env
 
+# for all avatars
+/avatar
+
 # IDE
 /.idea
 /.awcache

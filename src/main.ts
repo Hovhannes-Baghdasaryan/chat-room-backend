@@ -1,20 +1,44 @@
 import { Logger } from '@nestjs/common'
-import { AppModule } from './app.module'
 import { NestFactory } from '@nestjs/core'
-import { setupAppConfig } from './common/config/app.config'
-import { setupSwaggerConfig } from './common/config/swagger.config'
+import { ConfigService } from '@nestjs/config'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { AppModule } from './app.module'
+import { join } from 'path'
 
 async function bootstrap() {
   const logger = new Logger('App')
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
-  setupAppConfig(app)
-  setupSwaggerConfig(app)
+  const configService = app.get(ConfigService)
 
-  await app.listen(process.env.APP_PORT || 3002, () => {
-    logger.log(`App running in http://localhost:${process.env.APP_PORT}`)
+  const appConfig = configService.get('app')
+
+  app.enableCors({ origin: '*' })
+
+  app.setGlobalPrefix(appConfig.api_prefix)
+
+  const options = new DocumentBuilder()
+    .setTitle('Chat Room Application')
+    .setDescription('Docs')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build()
+
+  const document = SwaggerModule.createDocument(app, options)
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
+
+  app.useStaticAssets(join(__dirname, '../avatar'), {
+    prefix: '/avatar',
+  })
+
+  await app.listen(appConfig.port, () => {
+    logger.log(`App running in ${appConfig.server_domain}${appConfig.port}`)
   })
 }
 
