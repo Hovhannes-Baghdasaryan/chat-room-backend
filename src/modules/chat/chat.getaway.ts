@@ -31,11 +31,16 @@ export class ChatGateway {
     @MessageBody() data: I_Message
   ) {
     this.logger.log(
-      `Client Connected to ${socket.id} ${data.message} ${data.username}`
+      `Client Connected to ${socket.id} ${data?.message} ${data?.username}`
     )
 
-    this.chatService.addMessage(data)
+    if (data?.message) {
+      const newMessage = this.chatService.addMessage({
+        ...data,
+        date: new Date(),
+      })
 
-    this.server.emit('receive_message', data)
+      this.server.emit('receive_message', newMessage)
+    }
   }
 }

@@ -6,7 +6,9 @@ export class ChatService {
   private readonly chatMessages: I_Message[] = []
 
   public addMessage(message: I_Message) {
-    this.chatMessages.push(message)
+    this.chatMessages.concat(message)
+
+    return message
   }
 
   public getMessages(): I_Message[] {
