@@ -5,12 +5,17 @@ import { ForbiddenException } from '@nestjs/common'
 export const fileSize = 10485760
 
 export const fileFilter = (req, file, callback) => {
-  const allowedExtensions = ['.png', '.jpeg', '.webp', '.jpg']
+  const allowedExtensions = ['.png', '.jpeg', '.jpg', '.jfif']
 
   const fileExtName = extname(file.originalname).toLowerCase()
 
   if (!allowedExtensions.includes(fileExtName)) {
-    return callback(new ForbiddenException('Only few file formats are allowed!'), false)
+    return callback(
+      new ForbiddenException(
+        `File format should be one of these formats ${allowedExtensions.join(', ')}`
+      ),
+      false
+    )
   }
 
   callback(null, true)
