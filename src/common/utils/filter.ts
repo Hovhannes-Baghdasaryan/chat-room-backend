@@ -1,4 +1,8 @@
 import { extname } from 'path'
+import { ForbiddenException } from '@nestjs/common'
+
+// 10 mb
+export const fileSize = 10485760
 
 export const fileFilter = (req, file, callback) => {
   const allowedExtensions = ['.png', '.jpeg', '.webp', '.jpg']
@@ -6,7 +10,7 @@ export const fileFilter = (req, file, callback) => {
   const fileExtName = extname(file.originalname).toLowerCase()
 
   if (!allowedExtensions.includes(fileExtName)) {
-    return callback(new Error('Only few file formats are allowed!'), false)
+    return callback(new ForbiddenException('Only few file formats are allowed!'), false)
   }
 
   callback(null, true)

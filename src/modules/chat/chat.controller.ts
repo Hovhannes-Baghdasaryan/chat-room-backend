@@ -9,11 +9,12 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common/decorators'
-import { editFileName, fileFilter } from 'src/common/utils/filter'
+import { editFileName, fileFilter, fileSize } from 'src/common/utils/filter'
 import { MessageOutputDto } from 'src/common/dto/message.dto'
 import { ChatService } from './chat.service'
 
 import { JoinDto, JoinOutputDto } from 'src/common/dto/join.dto'
+import { HttpStatus, ParseFilePipeBuilder } from '@nestjs/common'
 
 @ApiTags('Chat')
 @Controller()
@@ -39,6 +40,7 @@ export class ChatController {
   })
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: { fileSize },
       storage: multer.diskStorage({
         destination: './avatar',
         filename: editFileName,
@@ -47,7 +49,13 @@ export class ChatController {
     })
   )
   @ApiOkResponse({ type: JoinOutputDto })
-  joinChat(@Body() joinDto: JoinDto, @UploadedFile() file) {
+  joinChat(
+    @Body() joinDto: JoinDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder().build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY })
+    )
+    file
+  ) {
     return this.chatService.joinChat(joinDto, file)
   }
 }

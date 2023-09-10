@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { ConfigService } from '@nestjs/config'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -18,6 +18,8 @@ async function bootstrap() {
   app.enableCors({ origin: '*' })
 
   app.setGlobalPrefix(appConfig.api_prefix)
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
 
   const options = new DocumentBuilder()
     .setTitle('Chat Room Application')
