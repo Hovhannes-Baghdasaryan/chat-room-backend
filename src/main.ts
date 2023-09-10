@@ -28,12 +28,14 @@ async function bootstrap() {
     .addBearerAuth()
     .build()
 
-  const document = SwaggerModule.createDocument(app, options)
-  SwaggerModule.setup('docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  })
+  if (appConfig.node_env === 'development') {
+    const document = SwaggerModule.createDocument(app, options)
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    })
+  }
 
   app.useStaticAssets(join(__dirname, '../avatar'), {
     prefix: '/avatar',
